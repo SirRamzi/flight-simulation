@@ -1,12 +1,19 @@
 package ru.sirramzi.ssau;
 
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.canvas.Canvas;
+import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.control.Button;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -32,13 +39,14 @@ public class App extends Application {
     static double lam = 0;
     private static double[] y0 = { r0, fi0, Vr0, Vfi0 + deltaVFi };
 
-    private static Scene scene;
+    private LineChart<Number, Number> lineChartDec;
 
     @Override
     public void start(Stage stage) throws IOException {
         double t0 = 0.0; // start time
         double tn = 4.4; // end time
         double h = 0.1; // step size
+
         Function<Double, double[]> f = t -> {
             double[] dydt = new double[4];
             dydt[0] = y0[2]; // drDt
@@ -47,6 +55,7 @@ public class App extends Application {
             dydt[3] = -(y0[2] * y0[3]) / y0[0]; // dVFiDt
             return dydt;
         };
+
         XYChart.Series<Number, Number> drDtSeries = new XYChart.Series<>();
         drDtSeries.setName("dr_dt");
         XYChart.Series<Number, Number> dFiDtSeries = new XYChart.Series<>();
@@ -55,6 +64,14 @@ public class App extends Application {
         dVrDtSeries.setName("dVr_dt");
         XYChart.Series<Number, Number> dVFiDtSeries = new XYChart.Series<>();
         dVFiDtSeries.setName("dVFi_dt");
+
+        Canvas canvas = new Canvas(400, 400);
+        GraphicsContext gc = canvas.getGraphicsContext2D();
+        gc.setStroke(Color.BLUE);
+        gc.setFill(Color.LIGHTBLUE);
+        double centerX = canvas.getWidth() / 2;
+        double centerY = canvas.getHeight() / 2;
+
         for (double t = t0; t <= tn; t += h) {
             double[] y = RungeKutta4.solve(y0, t, t + h, f);
             y0 = y;
@@ -62,29 +79,73 @@ public class App extends Application {
             dFiDtSeries.getData().add(new XYChart.Data<>(t, y0[1]));
             dVrDtSeries.getData().add(new XYChart.Data<>(t, y0[2]));
             dVFiDtSeries.getData().add(new XYChart.Data<>(t, y0[3]));
+
+            double xx = centerX + y0[0] * 0.001 * Math.cos(y0[1]);
+            double yy = centerY + y0[0] * 0.001 * Math.sin(y0[1]);
+            gc.setFill(Color.BLACK);
+            gc.fillOval(xx, yy, 2, 2);
         }
+
         NumberAxis xAxis = new NumberAxis();
         NumberAxis yAxis = new NumberAxis();
         xAxis.setLabel("Time, s");
         yAxis.setLabel("Value");
-        LineChart<Number, Number> lineChart = new LineChart<>(xAxis, yAxis);
-        lineChart.setCreateSymbols(false);
-        lineChart.getData().add(drDtSeries);
-        lineChart.getData().add(dFiDtSeries);
-        lineChart.getData().add(dVrDtSeries);
-        lineChart.getData().add(dVFiDtSeries);
-        scene = new Scene(lineChart, 640, 480);
+
+        lineChartDec = new LineChart<>(new NumberAxis(), new NumberAxis());
+        lineChartDec.setCreateSymbols(false);
+        lineChartDec.getData().add(drDtSeries);
+        lineChartDec.getData().add(dFiDtSeries);
+        lineChartDec.getData().add(dVrDtSeries);
+        lineChartDec.getData().add(dVFiDtSeries);
+
+        // create a BorderPane to hold the menu and the charts
+        BorderPane borderPane = new BorderPane();
+
+        // create the VBox to hold the navigation buttons
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(10));
+        vBox.setSpacing(10);
+
+        // create the navigation buttons
+        Button polarChartButton = new Button("Polar Chart");
+        Button decChartButton = new Button("Decrt Chart");
+
+        // add the buttons to the VBox
+        vBox.getChildren().addAll(polarChartButton, decChartButton);
+
+        // create the StackPane to hold the charts
+        StackPane stackPane = new StackPane();
+        stackPane.setAlignment(Pos.CENTER);
+
+        // add the line chart and the bar chart to the StackPane
+        stackPane.getChildren().addAll(lineChartDec, canvas);
+
+        // set the visibility of the bar chart to false
+        canvas.setVisible(false);
+
+        // set the action for the line button
+        polarChartButton.setOnAction((event) -> {
+            lineChartDec.setVisible(true);
+            canvas.setVisible(false);
+        });
+
+        // set the action for the bar button
+        decChartButton.setOnAction((event) -> {
+            lineChartDec.setVisible(false);
+            canvas.setVisible(true);
+        });
+
+        // add the VBox and the StackPane to the BorderPane
+        borderPane.setLeft(vBox);
+        borderPane.setCenter(stackPane);
+
+        // create a Scene to hold the BorderPane
+        Scene scene = new Scene(borderPane, 800, 600);
+
+        // set the Scene in the Stage
         stage.setScene(scene);
         stage.show();
-    }
 
-    static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
-    }
-
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
     }
 
     public static void main(String[] args) {
