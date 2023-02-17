@@ -4,16 +4,16 @@ import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
-import javafx.scene.canvas.Canvas;
-import javafx.scene.canvas.GraphicsContext;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
+import javafx.scene.chart.LineChart.SortingPolicy;
 import javafx.scene.control.Button;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
+import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -40,6 +40,7 @@ public class App extends Application {
     private static double[] y0 = { r0, fi0, Vr0, Vfi0 + deltaVFi };
 
     private LineChart<Number, Number> lineChartDec;
+    private LineChart<Number, Number> lineChartPolar;
 
     @Override
     public void start(Stage stage) throws IOException {
@@ -65,12 +66,18 @@ public class App extends Application {
         XYChart.Series<Number, Number> dVFiDtSeries = new XYChart.Series<>();
         dVFiDtSeries.setName("dVFi_dt");
 
-        Canvas canvas = new Canvas(400, 400);
-        GraphicsContext gc = canvas.getGraphicsContext2D();
-        gc.setStroke(Color.BLUE);
-        gc.setFill(Color.LIGHTBLUE);
-        double centerX = canvas.getWidth() / 2;
-        double centerY = canvas.getHeight() / 2;
+        XYChart.Series<Number, Number> drDFiSeries = new XYChart.Series<>();
+        dVFiDtSeries.setName("dr_dFi");
+
+        XYChart.Series<Number, Number> earthSeries = new XYChart.Series<>();
+        earthSeries.setName("earh");
+        XYChart.Series<Number, Number> marsSeries = new XYChart.Series<>();
+        marsSeries.setName("mars");
+
+        for (double i = 0; i <= 360; i++) {
+            earthSeries.getData().add(new XYChart.Data<>(r0 * Math.cos(Math.toRadians(i)), r0 * Math.sin(Math.toRadians(i))));
+            marsSeries.getData().add(new XYChart.Data<>(rk * Math.cos(Math.toRadians(i)), rk * Math.sin(Math.toRadians(i))));
+        }
 
         for (double t = t0; t <= tn; t += h) {
             double[] y = RungeKutta4.solve(y0, t, t + h, f);
@@ -80,24 +87,34 @@ public class App extends Application {
             dVrDtSeries.getData().add(new XYChart.Data<>(t, y0[2]));
             dVFiDtSeries.getData().add(new XYChart.Data<>(t, y0[3]));
 
-            double xx = centerX + y0[0] * 0.001 * Math.cos(y0[1]);
-            double yy = centerY + y0[0] * 0.001 * Math.sin(y0[1]);
-            gc.setFill(Color.BLACK);
-            gc.fillOval(xx, yy, 2, 2);
+            drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
         }
 
-        NumberAxis xAxis = new NumberAxis();
-        NumberAxis yAxis = new NumberAxis();
-        xAxis.setLabel("Time, s");
-        yAxis.setLabel("Value");
+        NumberAxis xAxisDec = new NumberAxis();
+        NumberAxis yAxisDec = new NumberAxis();
+        xAxisDec.setLabel("Time, s");
+        yAxisDec.setLabel("Value");
 
-        lineChartDec = new LineChart<>(new NumberAxis(), new NumberAxis());
+        lineChartDec = new LineChart<Number, Number>(xAxisDec, yAxisDec);
         lineChartDec.setCreateSymbols(false);
+        lineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
         lineChartDec.getData().add(drDtSeries);
         lineChartDec.getData().add(dFiDtSeries);
         lineChartDec.getData().add(dVrDtSeries);
         lineChartDec.getData().add(dVFiDtSeries);
 
+        NumberAxis xAxisPolar = new NumberAxis(-2, 2, 0.25);
+        NumberAxis yAxisPolar = new NumberAxis(-2, 2, 0.25);
+        xAxisPolar.setLabel("r");
+        yAxisPolar.setLabel("fi");
+
+        lineChartPolar = new LineChart<Number, Number>(xAxisPolar, yAxisPolar);
+        lineChartPolar.setCreateSymbols(false);
+        lineChartPolar.setAxisSortingPolicy(SortingPolicy.NONE);
+        lineChartPolar.getData().add(drDFiSeries);
+        lineChartPolar.getData().add(earthSeries);
+        lineChartPolar.getData().add(marsSeries);
+        
         // create a BorderPane to hold the menu and the charts
         BorderPane borderPane = new BorderPane();
 
@@ -108,7 +125,7 @@ public class App extends Application {
 
         // create the navigation buttons
         Button polarChartButton = new Button("Polar Chart");
-        Button decChartButton = new Button("Decrt Chart");
+        Button decChartButton = new Button("Decart Chart");
 
         // add the buttons to the VBox
         vBox.getChildren().addAll(polarChartButton, decChartButton);
@@ -118,21 +135,21 @@ public class App extends Application {
         stackPane.setAlignment(Pos.CENTER);
 
         // add the line chart and the bar chart to the StackPane
-        stackPane.getChildren().addAll(lineChartDec, canvas);
+        stackPane.getChildren().addAll(lineChartDec, lineChartPolar);
 
         // set the visibility of the bar chart to false
-        canvas.setVisible(false);
+        lineChartPolar.setVisible(false);
 
         // set the action for the line button
         polarChartButton.setOnAction((event) -> {
             lineChartDec.setVisible(true);
-            canvas.setVisible(false);
+            lineChartPolar.setVisible(false);
         });
 
         // set the action for the bar button
         decChartButton.setOnAction((event) -> {
             lineChartDec.setVisible(false);
-            canvas.setVisible(true);
+            lineChartPolar.setVisible(true);
         });
 
         // add the VBox and the StackPane to the BorderPane
@@ -145,7 +162,6 @@ public class App extends Application {
         // set the Scene in the Stage
         stage.setScene(scene);
         stage.show();
-
     }
 
     public static void main(String[] args) {
