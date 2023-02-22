@@ -28,7 +28,7 @@ public class App extends Application {
     static double deltaVFi = Math.sqrt((2 * rk) / (r0 + rk) * (1 / r0)) - Math.sqrt(1 / r0);
     static double Vfi0 = Math.sqrt(mu / r0);
     static double Vr0 = 0;
-    static double Pa = 9.1 * (Math.pow(10, -1));
+    static double Pa = 9.1 * (Math.pow(10, -5));
     static double Pa2 = 9.1 * (Math.pow(10, -4));
     static double Sm = 250;
     static double m = 450;
@@ -58,12 +58,10 @@ public class App extends Application {
             double[] dydt = new double[4];
             dydt[0] = y0Sun[2]; // drDt
             dydt[1] = y0Sun[3] / y0Sun[0]; // dFiDt
-            dydt[2] = (Math.pow(y0Sun[3], 2) / y0Sun[0] - mu / Math.pow(y0Sun[0], 2))
-                    + ((((Pa * Sm * Math.pow(Rz, 2) * Math.pow(Math.cos(Math.toRadians(lam)), 2))
-                            / (Math.pow(y0Sun[0], 2) * m * mu))) * Math.cos(Math.toRadians(lam))); // dVrDt
-            dydt[3] = -((y0Sun[2] * y0Sun[3]) / y0Sun[0])
-                    + ((((Pa * Sm * Math.pow(Rz, 2) * Math.pow(Math.cos(Math.toRadians(lam)), 2))
-                    / (Math.pow(y0Sun[0], 2) * m * mu))) * Math.sin(Math.toRadians(lam))); // dVFiDt
+            dydt[2] = Math.pow(y0Sun[3], 2) / y0Sun[0] - mu / Math.pow(y0Sun[0], 2)
+                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun) * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.cos(Math.toRadians(lam)); // dVrDt
+            dydt[3] = (-(y0Sun[2] * y0Sun[3]) / y0Sun[0])
+                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun) * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.sin(Math.toRadians(lam)); // dVFiDt
             return dydt;
         };
 
@@ -130,9 +128,10 @@ public class App extends Application {
         lineChartDec.setCreateSymbols(false);
         lineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
         lineChartDec.getData().add(drDtSeries);
-        lineChartDec.getData().add(dFiDtSeries);
-        lineChartDec.getData().add(dVrDtSeries);
-        lineChartDec.getData().add(dVFiDtSeries);
+        // lineChartDec.getData().add(dFiDtSeries);
+        // lineChartDec.getData().add(dVrDtSeries);
+        // lineChartDec.getData().add(dVFiDtSeries);
+        lineChartDec.getData().add(drDtSunSeries);
 
         NumberAxis xAxisPolar = new NumberAxis(-2, 2, 0.25);
         NumberAxis yAxisPolar = new NumberAxis(-2, 2, 0.25);
