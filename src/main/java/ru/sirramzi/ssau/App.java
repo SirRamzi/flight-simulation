@@ -128,9 +128,6 @@ public class App extends Application {
         lineChartDec.setCreateSymbols(false);
         lineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
         lineChartDec.getData().add(drDtSeries);
-        // lineChartDec.getData().add(dFiDtSeries);
-        // lineChartDec.getData().add(dVrDtSeries);
-        // lineChartDec.getData().add(dVFiDtSeries);
         lineChartDec.getData().add(drDtSunSeries);
 
         NumberAxis xAxisPolar = new NumberAxis(-2, 2, 0.25);
