@@ -59,33 +59,24 @@ public class App extends Application {
             dydt[0] = y0Sun[2]; // drDt
             dydt[1] = y0Sun[3] / y0Sun[0]; // dFiDt
             dydt[2] = Math.pow(y0Sun[3], 2) / y0Sun[0] - mu / Math.pow(y0Sun[0], 2)
-                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun) * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.cos(Math.toRadians(lam)); // dVrDt
+                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
+                            * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.cos(Math.toRadians(lam)); // dVrDt
             dydt[3] = (-(y0Sun[2] * y0Sun[3]) / y0Sun[0])
-                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun) * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.sin(Math.toRadians(lam)); // dVFiDt
+                    + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
+                            * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.sin(Math.toRadians(lam)); // dVFiDt
             return dydt;
         };
 
-        XYChart.Series<Number, Number> drDtSeries = new XYChart.Series<>();
-        drDtSeries.setName("dr_dt");
-        XYChart.Series<Number, Number> dFiDtSeries = new XYChart.Series<>();
-        dFiDtSeries.setName("dFi_dt");
-        XYChart.Series<Number, Number> dVrDtSeries = new XYChart.Series<>();
-        dVrDtSeries.setName("dVr_dt");
-        XYChart.Series<Number, Number> dVFiDtSeries = new XYChart.Series<>();
-        dVFiDtSeries.setName("dVFi_dt");
         XYChart.Series<Number, Number> drDFiSeries = new XYChart.Series<>();
         drDFiSeries.setName("dr_dFi");
-
-        XYChart.Series<Number, Number> drDtSunSeries = new XYChart.Series<>();
-        drDtSunSeries.setName("dr_dtSun");
-        XYChart.Series<Number, Number> dFiDtSunSeries = new XYChart.Series<>();
-        dFiDtSunSeries.setName("dFi_dtSun");
-        XYChart.Series<Number, Number> dVrDtSunSeries = new XYChart.Series<>();
-        dVrDtSunSeries.setName("dVr_dtSun");
-        XYChart.Series<Number, Number> dVFiDtSunSeries = new XYChart.Series<>();
-        dVFiDtSunSeries.setName("dVFi_dtSun");
         XYChart.Series<Number, Number> drDFiSunSeries = new XYChart.Series<>();
         drDFiSunSeries.setName("dr_dFiSun");
+        XYChart.Series<Number, Number> drDtSeries = new XYChart.Series<>();
+        drDtSeries.setName("dr_dt");
+        XYChart.Series<Number, Number> drDtSunSeries = new XYChart.Series<>();
+        drDtSunSeries.setName("dr_dtSun");
+        XYChart.Series<Number, Number> PaSeries = new XYChart.Series<>();
+        PaSeries.setName("Pa");
 
         XYChart.Series<Number, Number> earthSeries = new XYChart.Series<>();
         earthSeries.setName("earh");
@@ -104,19 +95,15 @@ public class App extends Application {
             double[] ySun = RungeKutta4.solve(y0Sun, t, t + h, fSun);
             y0 = y;
             y0Sun = ySun;
-            drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
-            dFiDtSeries.getData().add(new XYChart.Data<>(t, y0[1]));
-            dVrDtSeries.getData().add(new XYChart.Data<>(t, y0[2]));
-            dVFiDtSeries.getData().add(new XYChart.Data<>(t, y0[3]));
-            drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
 
-            drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
-            dFiDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[1]));
-            dVrDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[2]));
-            dVFiDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[3]));
+            drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
             drDFiSunSeries.getData()
                     .add(new XYChart.Data<>(y0Sun[0] * Math.cos(y0Sun[1]), y0Sun[0] * Math.sin(y0Sun[1])));
 
+            drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
+            drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
+
+            PaSeries.getData().add(new XYChart.Data<>(t, - (Pa * t * t / t0 * tn) + Pa));
         }
 
         NumberAxis xAxisDec = new NumberAxis();
