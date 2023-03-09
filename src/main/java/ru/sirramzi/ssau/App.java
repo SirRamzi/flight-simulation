@@ -103,7 +103,8 @@ public class App extends Application {
             drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
             drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
 
-            PaSeries.getData().add(new XYChart.Data<>(t, - (Pa * t * t / t0 * tn) + Pa));
+            // PaSeries.getData().add(new XYChart.Data<>(t, - (Pa * t * t / t0 * tn) + Pa));
+            PaSeries.getData().add(new XYChart.Data<>(t, Pa / (4 * (tn - t0)) * Math.pow(t - (t0 + tn) / 2, 2)));
         }
 
         NumberAxis xAxisDec = new NumberAxis();
@@ -112,10 +113,11 @@ public class App extends Application {
         yAxisDec.setLabel("Value");
 
         lineChartDec = new LineChart<Number, Number>(xAxisDec, yAxisDec);
-        lineChartDec.setCreateSymbols(false);
+        lineChartDec.setCreateSymbols(true);
         lineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
-        lineChartDec.getData().add(drDtSeries);
-        lineChartDec.getData().add(drDtSunSeries);
+        lineChartDec.getData().add(PaSeries);
+        // lineChartDec.getData().add(drDtSeries);
+        // lineChartDec.getData().add(drDtSunSeries);
 
         NumberAxis xAxisPolar = new NumberAxis(-2, 2, 0.25);
         NumberAxis yAxisPolar = new NumberAxis(-2, 2, 0.25);
