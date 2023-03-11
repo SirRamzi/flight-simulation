@@ -44,6 +44,8 @@ public class App extends Application {
         double t0 = 0.0; // start time
         double tn = 4.4; // end time
         double h = 0.01; // step size
+        double[] y;
+        double[] ySun;
 
         Function<Double, double[]> f = t -> {
             double[] dydt = new double[4];
@@ -51,19 +53,6 @@ public class App extends Application {
             dydt[1] = y0[3] / y0[0]; // dFiDt
             dydt[2] = Math.pow(y0[3], 2) / y0[0] - 1 / Math.pow(y0[0], 2); // dVrDt
             dydt[3] = -(y0[2] * y0[3]) / y0[0]; // dVFiDt
-            return dydt;
-        };
-
-        Function<Double, double[]> fSun = t -> {
-            double[] dydt = new double[4];
-            dydt[0] = y0Sun[2]; // drDt
-            dydt[1] = y0Sun[3] / y0Sun[0]; // dFiDt
-            dydt[2] = Math.pow(y0Sun[3], 2) / y0Sun[0] - mu / Math.pow(y0Sun[0], 2)
-                    + ((Pa1 * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
-                            * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.cos(Math.toRadians(lam)); // dVrDt
-            dydt[3] = (-(y0Sun[2] * y0Sun[3]) / y0Sun[0])
-                    + ((Pa1 * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
-                            * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.sin(Math.toRadians(lam)); // dVFiDt
             return dydt;
         };
 
@@ -77,7 +66,6 @@ public class App extends Application {
         drDtSunSeries.setName("dr_dtSun");
         XYChart.Series<Number, Number> PaSeries = new XYChart.Series<>();
         PaSeries.setName("Pa");
-
         XYChart.Series<Number, Number> earthSeries = new XYChart.Series<>();
         earthSeries.setName("earh");
         XYChart.Series<Number, Number> marsSeries = new XYChart.Series<>();
@@ -91,11 +79,29 @@ public class App extends Application {
         }
 
         for (double t = t0; t <= tn; t += h) {
-            double[] y = RungeKutta4.solve(y0, t, t + h, f);
-            double[] ySun = RungeKutta4.solve(y0Sun, t, t + h, fSun);
+            double Pa = -((4 * Pa1 - 4 * Pa2) / (3 * t0 * t0 + 2 * t0 * tn - tn * tn)) * t * t
+                    - ((4 * Pa1 - 4 * Pa2) / (tn - 3 * t0)) * t
+                    - ((Pa1 * tn * tn - 3 * Pa1 * t0 * t0 + 2 * Pa1 * t0 * tn - 4 * Pa2 * t0 * tn)
+                            / (3 * t0 * t0 + 2 * t0 * tn - tn * tn));
+            Function<Double, double[]> fSun = tt -> {
+                double[] dydt = new double[4];
+                dydt[0] = y0Sun[2]; // drDt
+                dydt[1] = y0Sun[3] / y0Sun[0]; // dFiDt
+                dydt[2] = Math.pow(y0Sun[3], 2) / y0Sun[0] - mu / Math.pow(y0Sun[0], 2)
+                        + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
+                                * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.cos(Math.toRadians(lam)); // dVrDt
+                dydt[3] = (-(y0Sun[2] * y0Sun[3]) / y0Sun[0])
+                        + ((Pa * Sm) / (y0Sun[0] * y0Sun[0] * m)) * ((Rz * Rz) / muSun)
+                                * Math.pow(Math.cos(Math.toRadians(lam)), 2) * Math.sin(Math.toRadians(lam)); // dVFiDt
+                return dydt;
+            };
+
+            y = RungeKutta4.solve(y0, t, t + h, f);
+            ySun = RungeKutta4.solve(y0Sun, t, t + h, fSun);
             y0 = y;
             y0Sun = ySun;
 
+            PaSeries.getData().add(new XYChart.Data<>(t, Pa));
             drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
             drDFiSunSeries.getData()
                     .add(new XYChart.Data<>(y0Sun[0] * Math.cos(y0Sun[1]), y0Sun[0] * Math.sin(y0Sun[1])));
@@ -103,12 +109,6 @@ public class App extends Application {
             drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
             drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
 
-            PaSeries.getData()
-                    .add(new XYChart.Data<>(t,
-                            -((4 * Pa1 - 4 * Pa2) / (3 * t0 * t0 + 2 * t0 * tn - tn * tn)) * t * t
-                                    - ((4 * Pa1 - 4 * Pa2) / (tn - 3 * t0)) * t
-                                    - ((Pa1 * tn * tn - 3 * Pa1 * t0 * t0 + 2 * Pa1 * t0 * tn - 4 * Pa2 * t0 * tn)
-                                            / (3 * t0 * t0 + 2 * t0 * tn - tn * tn))));
         }
 
         NumberAxis xAxisDec = new NumberAxis();
