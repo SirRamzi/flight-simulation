@@ -19,22 +19,29 @@ import java.util.function.Function;
 
 public class App extends Application {
 
-    static double fi0 = 0;
-    static double r0 = 1;
-    static double mu = 1;
-    static double rk = 1.524;
-    static double Rz = 149.6 * (Math.pow(10, 9));
-    static double muSun = 1.3273 * (Math.pow(10, 20));
-    static double deltaVFi = Math.sqrt((2 * rk) / (r0 + rk) * (1 / r0)) - Math.sqrt(1 / r0);
-    static double Vfi0 = Math.sqrt(mu / r0);
-    static double Vr0 = 0;
-    static double Pa1 = 9.1 * (Math.pow(10, -6));
-    static double Pa2 = 9.1 * (Math.pow(10, -4.5));
-    static double Sm = 250;
-    static double m = 450;
-    static double lam = 35.26;
-    private static double[] y0 = { r0, fi0, Vr0, Vfi0 + deltaVFi };
-    private static double[] y0Sun = { r0, fi0, Vr0, Vfi0 + deltaVFi };
+    private double t0 = 0.0; // start time
+    private double tn = 4.4; // end time
+    private double t1 = 1;
+    private double t2 = 3;
+    private double h = 0.01; // step size
+    private double[] y;
+    private double[] ySun;
+    private double fi0 = 0;
+    private double r0 = 1;
+    private double mu = 1;
+    private double rk = 1.524;
+    private double Rz = 149.6 * (Math.pow(10, 9));
+    private double muSun = 1.3273 * (Math.pow(10, 20));
+    private double dVFi = Math.sqrt((2 * rk) / (r0 + rk) * (1 / r0)) - Math.sqrt(1 / r0);
+    private double Vfi0 = Math.sqrt(mu / r0);
+    private double Vr0 = 0;
+    private double Pa1 = 9.1 * (Math.pow(10, -6));
+    private double Pa2 = 9.1 * (Math.pow(10, -4.5));
+    private double Sm = 250;
+    private double m = 450;
+    private double lam = 35.26;
+    private double[] y0 = { r0, fi0, Vr0, Vfi0 + dVFi };
+    private double[] y0Sun = { r0, fi0, Vr0, Vfi0 + dVFi };
 
     private LineChart<Number, Number> rtlineChartDec;
     private LineChart<Number, Number> PalineChartDec;
@@ -42,13 +49,7 @@ public class App extends Application {
 
     @Override
     public void start(Stage stage) throws IOException {
-        double t0 = 0.0; // start time
-        double tn = 4.4; // end time
-        double t1 = 0.5;
-        double t2 = 4.2;
-        double h = 0.01; // step size
-        double[] y;
-        double[] ySun;
+        double[] initialData = { t0, tn, t1, t2, h, r0, mu, rk, Rz, muSun, Pa1, Pa2 };
 
         Function<Double, double[]> f = t -> {
             double[] dydt = new double[4];
@@ -82,10 +83,12 @@ public class App extends Application {
         }
 
         for (double t = t0; t <= tn; t += h) {
-            double Pa = -((4 * Pa1 - 4 * Pa2) / (3 * t0 * t0 + 2 * t0 * tn - tn * tn)) * t * t
-                    - ((4 * Pa1 - 4 * Pa2) / (tn - 3 * t0)) * t
-                    - ((Pa1 * tn * tn - 3 * Pa1 * t0 * t0 + 2 * Pa1 * t0 * tn - 4 * Pa2 * t0 * tn)
-                            / (3 * t0 * t0 + 2 * t0 * tn - tn * tn));
+            double Pa;
+            if (t < t1 || t > t2) {
+                Pa = Pa1;
+            } else {
+                Pa = (Pa2 - Pa1) * (1 - Math.pow(t - (t2 + t1) / 2, 2) / Math.pow(t1 - (t2 + t1) / 2, 2)) + Pa1;
+            }
             Function<Double, double[]> fSun = tt -> {
                 double[] dydt = new double[4];
                 dydt[0] = y0Sun[2]; // drDt
@@ -186,7 +189,7 @@ public class App extends Application {
             PalineChartDec.setVisible(true);
             lineChartPolar.setVisible(false);
         });
-        
+
         // set the action for the bar button
         polarChartButton.setOnAction((event) -> {
             rtlineChartDec.setVisible(false);
