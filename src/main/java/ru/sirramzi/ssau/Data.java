@@ -5,6 +5,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.function.Function;
 
+import javafx.scene.chart.XYChart;
+import javafx.scene.chart.XYChart.Series;
+
 public class Data {
     private double t0 = 0.0; // start time
     private double tn = 4.4; // end time
@@ -25,23 +28,28 @@ public class Data {
     private double Sm = 250;
     private double m = 450;
     private double lam = 35.26;
-    private double[] y0 = { r0, fi0, Vr0, Vfi0 + dVFi };
-    private double[] y0Sun = { r0, fi0, Vr0, Vfi0 + dVFi };
+    private double[] y0 = { r0, fi0, Vr0, Vfi0 + dVFi, 0, 0 };
+    private double[] y0Sun = { r0, fi0, Vr0, Vfi0 + dVFi, 0, 0 };
 
     private void resetY(double[] y) {
         y[0] = r0;
         y[1] = fi0;
         y[2] = Vr0;
-        y[3] = Vr0;
-        y[4] = Vfi0 + dVFi;
+        y[3] = Vfi0 + dVFi;
+        y[4] = 0;
+        y[5] = 0;
     }
 
     public void setInitialData(HashMap<String, Double> initialData) {
-
+        
     }
 
-    public List<double[]> getData() {
-        List<double[]> data = new ArrayList<>();
+    public List<Series<Number, Number>> getData() {
+        List<Series<Number, Number>> seriesList = new ArrayList<>();
+        XYChart.Series<Number, Number> drDFiSeries = new XYChart.Series<>();
+        drDFiSeries.setName("r_Fi");
+        XYChart.Series<Number, Number> drDtSeries = new XYChart.Series<>();
+        drDtSeries.setName("r_t");
         double[] y;
         Function<Double, double[]> f = t -> {
             double[] dydt = new double[4];
@@ -54,14 +62,23 @@ public class Data {
         for (double t = t0; t <= tn; t += h) {
             y = RungeKutta4.solve(y0, t, t + h, f);
             y0 = y;
-            data.add(y);
+            drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
+            drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
         }
+        seriesList.add(drDtSeries);
+        seriesList.add(drDFiSeries);
         resetY(y0);
-        return data;
+        return seriesList;
     }
 
-    public List<double[]> getSunData() {
-        List<double[]> data = new ArrayList<>();
+    public List<Series<Number, Number>> getSunData() {
+        List<Series<Number, Number>> seriesList = new ArrayList<>();
+        XYChart.Series<Number, Number> PaSeries = new XYChart.Series<>();
+        PaSeries.setName("Pa");
+        XYChart.Series<Number, Number> drDFiSunSeries = new XYChart.Series<>();
+        drDFiSunSeries.setName("r_Fi_Sun");
+        XYChart.Series<Number, Number> drDtSunSeries = new XYChart.Series<>();
+        drDtSunSeries.setName("r_t_Sun");
         double[] y;
         for (double t = t0; t <= tn; t += h) {
             double Pa;
@@ -84,9 +101,32 @@ public class Data {
             };
             y = RungeKutta4.solve(y0Sun, t, t + h, fSun);
             y0Sun = y;
-            data.add(y);
+            PaSeries.getData().add(new XYChart.Data<>(t, Pa));
+            drDFiSunSeries.getData()
+                    .add(new XYChart.Data<>(y0Sun[0] * Math.cos(y0Sun[1]), y0Sun[0] * Math.sin(y0Sun[1])));
+            drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
         }
+        seriesList.add(PaSeries);
+        seriesList.add(drDtSunSeries);
+        seriesList.add(drDFiSunSeries);
         resetY(y0Sun);
-        return data;
+        return seriesList;
+    }
+
+    public List<Series<Number, Number>> getPlanetData() {
+        List<Series<Number, Number>> seriesList = new ArrayList<>();
+        XYChart.Series<Number, Number> earthSeries = new XYChart.Series<>();
+        earthSeries.setName("earh");
+        XYChart.Series<Number, Number> marsSeries = new XYChart.Series<>();
+        marsSeries.setName("mars");
+        for (double i = 0; i <= 360; i++) {
+            earthSeries.getData()
+                    .add(new XYChart.Data<>(r0 * Math.cos(Math.toRadians(i)), r0 * Math.sin(Math.toRadians(i))));
+            marsSeries.getData()
+                    .add(new XYChart.Data<>(rk * Math.cos(Math.toRadians(i)), rk * Math.sin(Math.toRadians(i))));
+        }
+        seriesList.add(earthSeries);
+        seriesList.add(marsSeries);
+        return seriesList;
     }
 }
