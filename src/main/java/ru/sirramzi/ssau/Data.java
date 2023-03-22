@@ -41,7 +41,63 @@ public class Data {
     }
 
     public void setInitialData(HashMap<String, Double> initialData) {
-        
+        if (initialData.containsKey("t0")) {
+            t0 = initialData.get("t0");
+        }
+        if (initialData.containsKey("tn")) {
+            tn = initialData.get("tn");
+        }
+        if (initialData.containsKey("t1")) {
+            t1 = initialData.get("t1");
+        }
+        if (initialData.containsKey("t2")) {
+            t2 = initialData.get("t2");
+        }
+        if (initialData.containsKey("h")) {
+            h = initialData.get("h");
+        }
+        if (initialData.containsKey("mu")) {
+            mu = initialData.get("mu");
+        }
+        if (initialData.containsKey("rk")) {
+            rk = initialData.get("rk");
+        }
+        if (initialData.containsKey("Rz")) {
+            Rz = initialData.get("Rz");
+        }
+        if (initialData.containsKey("muSun")) {
+            muSun = initialData.get("muSun");
+        }
+        if (initialData.containsKey("r0")) {
+            r0 = initialData.get("r0");
+        }
+        if (initialData.containsKey("fi0")) {
+            fi0 = initialData.get("fi0");
+        }
+        if (initialData.containsKey("Vr0")) {
+            Vr0 = initialData.get("Vr0");
+        }
+        if (initialData.containsKey("Vfi0")) {
+            Vfi0 = initialData.get("Vfi0");
+        }
+        if (initialData.containsKey("dVFi")) {
+            dVFi = initialData.get("dVFi");
+        }
+        if (initialData.containsKey("Pa1")) {
+            Pa1 = initialData.get("Pa1");
+        }
+        if (initialData.containsKey("Pa2")) {
+            Pa2 = initialData.get("Pa2");
+        }
+        if (initialData.containsKey("Sm")) {
+            Sm = initialData.get("Sm");
+        }
+        if (initialData.containsKey("m")) {
+            m = initialData.get("m");
+        }
+        if (initialData.containsKey("lam")) {
+            lam = initialData.get("lam");
+        }
     }
 
     public List<Series<Number, Number>> getData() {
