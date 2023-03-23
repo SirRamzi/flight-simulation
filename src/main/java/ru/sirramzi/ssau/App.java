@@ -9,12 +9,14 @@ import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.LineChart.SortingPolicy;
 import javafx.scene.chart.XYChart.Series;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
+import java.time.format.TextStyle;
 import java.util.List;
 
 public class App extends Application {
@@ -76,9 +78,13 @@ public class App extends Application {
         Button rtChartButton = new Button("rt Chart");
         Button PaChartButton = new Button("Pa Chart");
         Button polarChartButton = new Button("Polar Chart");
+        TextField t1Field = new TextField();
+        t1Field.setPromptText("t1");
+        TextField t2Field = new TextField();
+        t2Field.setPromptText("t2");
 
         // add the buttons to the VBox
-        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton);
+        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field);
 
         // create the StackPane to hold the charts
         StackPane stackPane = new StackPane();
