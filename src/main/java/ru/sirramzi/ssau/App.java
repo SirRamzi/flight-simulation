@@ -82,9 +82,10 @@ public class App extends Application {
         t1Field.setPromptText("t1");
         TextField t2Field = new TextField();
         t2Field.setPromptText("t2");
+        Button refresh = new Button("Refresh");
 
         // add the buttons to the VBox
-        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field);
+        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field, refresh);
 
         // create the StackPane to hold the charts
         StackPane stackPane = new StackPane();
