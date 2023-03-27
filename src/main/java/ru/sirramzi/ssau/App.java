@@ -16,7 +16,6 @@ import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.time.format.TextStyle;
 import java.util.List;
 
 public class App extends Application {
@@ -84,11 +83,13 @@ public class App extends Application {
         t2Field.setPromptText("t2");
         TextField P1Field = new TextField();
         P1Field.setPromptText("P1");
-
+        TextField P2Field = new TextField();
+        P2Field.setPromptText("P2");
         Button refresh = new Button("Refresh");
 
         // add the buttons to the VBox
-        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field, P1Field, P2Field, refresh);
+        vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field, P1Field, P2Field,
+                refresh);
 
         // create the StackPane to hold the charts
         StackPane stackPane = new StackPane();
