@@ -27,9 +27,6 @@ public class App extends Application {
     @Override
     public void start(Stage stage) throws IOException {
         Data marsData = new Data();
-        List<Series<Number, Number>> darkData = marsData.getData();
-        List<Series<Number, Number>> sunData = marsData.getSunData();
-        List<Series<Number, Number>> planetData = marsData.getPlanetData();
 
         // Pa chart
         NumberAxis PaxAxisDec = new NumberAxis();
@@ -39,7 +36,6 @@ public class App extends Application {
         PalineChartDec = new LineChart<Number, Number>(PaxAxisDec, PayAxisDec);
         PalineChartDec.setCreateSymbols(false);
         PalineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
-        PalineChartDec.getData().add(sunData.get(0));
 
         // rt chart
         NumberAxis rtxAxisDec = new NumberAxis();
@@ -49,8 +45,6 @@ public class App extends Application {
         rtlineChartDec = new LineChart<Number, Number>(rtxAxisDec, rtyAxisDec);
         rtlineChartDec.setCreateSymbols(false);
         rtlineChartDec.setAxisSortingPolicy(SortingPolicy.NONE);
-        rtlineChartDec.getData().add(darkData.get(0));
-        rtlineChartDec.getData().add(sunData.get(1));
 
         // rFi polar chart
         NumberAxis xAxisPolar = new NumberAxis(-2, 2, 0.25);
@@ -60,10 +54,6 @@ public class App extends Application {
         lineChartPolar = new LineChart<Number, Number>(xAxisPolar, yAxisPolar);
         lineChartPolar.setCreateSymbols(false);
         lineChartPolar.setAxisSortingPolicy(SortingPolicy.NONE);
-        lineChartPolar.getData().add(darkData.get(1));
-        lineChartPolar.getData().add(sunData.get(2));
-        lineChartPolar.getData().add(planetData.get(0));
-        lineChartPolar.getData().add(planetData.get(1));
 
         // create a BorderPane to hold the menu and the charts
         BorderPane borderPane = new BorderPane();
@@ -77,19 +67,19 @@ public class App extends Application {
         Button rtChartButton = new Button("rt Chart");
         Button PaChartButton = new Button("Pa Chart");
         Button polarChartButton = new Button("Polar Chart");
-        TextField t1Field = new TextField();
+        TextField t1Field = new TextField(Double.toString(marsData.getT1()));
         t1Field.setPromptText("t1");
-        TextField t2Field = new TextField();
+        TextField t2Field = new TextField(Double.toString(marsData.getT2()));
         t2Field.setPromptText("t2");
-        TextField P1Field = new TextField();
+        TextField P1Field = new TextField(Double.toString(marsData.getPa1()));
         P1Field.setPromptText("P1");
-        TextField P2Field = new TextField();
+        TextField P2Field = new TextField(Double.toString(marsData.getPa2()));
         P2Field.setPromptText("P2");
-        Button refresh = new Button("Refresh");
+        Button refreshButton = new Button("Reload");
 
         // add the buttons to the VBox
         vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field, P1Field, P2Field,
-                refresh);
+                refreshButton);
 
         // create the StackPane to hold the charts
         StackPane stackPane = new StackPane();
@@ -120,6 +110,26 @@ public class App extends Application {
             rtlineChartDec.setVisible(false);
             PalineChartDec.setVisible(false);
             lineChartPolar.setVisible(true);
+        });
+
+        refreshButton.setOnAction((event) -> {
+            marsData.setT1(Double.parseDouble(t1Field.getText()));
+            marsData.setT2(Double.parseDouble(t2Field.getText()));
+            marsData.setPa1(Double.parseDouble(P1Field.getText()));
+            marsData.setPa2(Double.parseDouble(P2Field.getText()));
+            List<Series<Number, Number>> darkData = marsData.getDarkData();
+            List<Series<Number, Number>> sunData = marsData.getSunData();
+            List<Series<Number, Number>> planetData = marsData.getPlanetData();
+            PalineChartDec.getData().clear();
+            rtlineChartDec.getData().clear();
+            lineChartPolar.getData().clear();
+            PalineChartDec.getData().add(sunData.get(0));
+            rtlineChartDec.getData().add(darkData.get(0));
+            rtlineChartDec.getData().add(sunData.get(1));
+            lineChartPolar.getData().add(darkData.get(1));
+            lineChartPolar.getData().add(sunData.get(2));
+            lineChartPolar.getData().add(planetData.get(0));
+            lineChartPolar.getData().add(planetData.get(1));
         });
 
         // add the VBox and the StackPane to the BorderPane
