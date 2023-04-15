@@ -13,6 +13,7 @@ import javafx.scene.control.TextField;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -39,7 +40,7 @@ public class App extends Application {
 
         // rt chart
         NumberAxis rtxAxisDec = new NumberAxis();
-        NumberAxis rtyAxisDec = new NumberAxis();
+        NumberAxis rtyAxisDec = new NumberAxis(0.8, 1.6, 0.05);
         rtxAxisDec.setLabel("Time, s");
         rtyAxisDec.setLabel("r, ae");
         rtlineChartDec = new LineChart<Number, Number>(rtxAxisDec, rtyAxisDec);
@@ -76,10 +77,11 @@ public class App extends Application {
         TextField P2Field = new TextField(Double.toString(marsData.getPa2()));
         P2Field.setPromptText("P2");
         Button refreshButton = new Button("Reload");
+        Text deltaText = new Text();
 
         // add the buttons to the VBox
         vBox.getChildren().addAll(rtChartButton, PaChartButton, polarChartButton, t1Field, t2Field, P1Field, P2Field,
-                refreshButton);
+                refreshButton, deltaText);
 
         // create the StackPane to hold the charts
         StackPane stackPane = new StackPane();
@@ -130,6 +132,7 @@ public class App extends Application {
             lineChartPolar.getData().add(sunData.get(2));
             lineChartPolar.getData().add(planetData.get(0));
             lineChartPolar.getData().add(planetData.get(1));
+            deltaText.setText("Отклонение: " + String.format("%,.6f", marsData.getDelta()));
         });
 
         // add the VBox and the StackPane to the BorderPane

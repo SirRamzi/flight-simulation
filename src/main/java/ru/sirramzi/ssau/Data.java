@@ -29,6 +29,8 @@ public class Data {
     private double lam = 35.26;
     private double[] y0 = { r0, fi0, Vr0, Vfi0 + dVFi, 0, 0 };
     private double[] y0Sun = { r0, fi0, Vr0, Vfi0 + dVFi, 0, 0 };
+    private double endDark;
+    private double endSun;
 
     private void resetY(double[] y) {
         y[0] = r0;
@@ -60,6 +62,7 @@ public class Data {
             drDFiSeries.getData().add(new XYChart.Data<>(y0[0] * Math.cos(y0[1]), y0[0] * Math.sin(y0[1])));
             drDtSeries.getData().add(new XYChart.Data<>(t, y0[0]));
         }
+        endDark = y0[0];
         seriesList.add(drDtSeries);
         seriesList.add(drDFiSeries);
         resetY(y0);
@@ -101,6 +104,7 @@ public class Data {
                     .add(new XYChart.Data<>(y0Sun[0] * Math.cos(y0Sun[1]), y0Sun[0] * Math.sin(y0Sun[1])));
             drDtSunSeries.getData().add(new XYChart.Data<>(t, y0Sun[0]));
         }
+        endSun = y0Sun[0];
         seriesList.add(PaSeries);
         seriesList.add(drDtSunSeries);
         seriesList.add(drDFiSunSeries);
@@ -123,6 +127,10 @@ public class Data {
         seriesList.add(earthSeries);
         seriesList.add(marsSeries);
         return seriesList;
+    }
+
+    public double getDelta() {
+        return endSun - endDark;
     }
 
     public double getT0() {
